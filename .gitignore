@@ -34,8 +34,8 @@ ENV/
 *~
 .DS_Store
 
-# Streamlit
-.streamlit/
+# Streamlit cache (keep config)
+.streamlit/secrets.toml
 
 # Data files (uncomment if you want to keep data private)
 # interior_designer_db.csv
