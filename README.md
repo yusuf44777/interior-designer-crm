@@ -10,6 +10,7 @@ Modern ve kullanıcı dostu bir İç Mimar Müşteri İlişkileri Yönetim (CRM)
 
 ### 👥 İç Mimar Yönetimi
 - ✅ İç mimar ekleme, listeleme ve silme
+- ✏️ **İç mimar bilgilerini düzenleme** (YENİ!)
 - 🔍 Gelişmiş arama ve filtreleme
 - 📊 Detaylı iletişim bilgileri yönetimi
 - 💼 Şirket ve LinkedIn bilgileri
@@ -25,11 +26,6 @@ Modern ve kullanıcı dostu bir İç Mimar Müşteri İlişkileri Yönetim (CRM)
 - 📤 CSV dosyası dışa aktarma
 - 📋 Boş şablon indirme
 - 🔄 Toplu veri işleme
-- 💼 **LinkedIn toplu içe aktarma** (YENİ!)
-  - LinkedIn bağlantılarını otomatik dönüştürme
-  - Akıllı kolon eşleştirme
-  - Pozisyon/şirket bazlı filtreleme
-  - Önizleme ve onay sistemi
 
 ### 📊 İstatistikler
 - 📈 Toplam iç mimar ve randevu sayıları
@@ -93,6 +89,13 @@ interior-designer-crm/
 2. Gerekli bilgileri doldurun (Ad, Soyad, Şirket adı zorunludur)
 3. **"✅ Ekle"** butonuna tıklayın
 
+### İç Mimar Düzenleme (YENİ! 🎉)
+1. **"✏️ İç Mimar Düzenle"** menüsünü açın
+2. Düzenlemek istediğiniz kişiyi arayın veya seçin
+3. Mevcut bilgileri görüntüleyin
+4. Yeni bilgileri girin
+5. **"✅ Güncelle"** butonuna tıklayın
+
 ### CSV İçe Aktarma
 1. **"📤 İçe/Dışa Aktar"** menüsüne gidin
 2. **"📥 CSV İçe Aktar"** sekmesini seçin
@@ -110,18 +113,6 @@ interior-designer-crm/
 2. **"📤 CSV Dışa Aktar"** sekmesini seçin
 3. İsteğe bağlı filtreleme seçeneklerini kullanın
 4. **"📥 Tüm Verileri İndir (CSV)"** butonuna tıklayın
-
-### LinkedIn'den Toplu İçe Aktarma (YENİ! 🎉)
-1. LinkedIn → My Network → Connections → "Export contacts"
-2. Email'inize gelen CSV dosyasını indirin
-3. **"💼 LinkedIn İçe Aktar"** menüsüne gidin
-4. CSV dosyasını yükleyin
-5. Kolonları otomatik eşleştir (veya manuel düzenle)
-6. Filtreleme uygula (opsiyonel):
-   - Sadece "designer, architect, interior" içeren pozisyonlar
-   - Sadece "design, architecture" içeren şirketler
-7. Önizlemeyi kontrol edin
-8. **"✅ LinkedIn Verilerini Ekle"** butonuna tıklayın
 
 ## 🔧 Yapılandırma
 
