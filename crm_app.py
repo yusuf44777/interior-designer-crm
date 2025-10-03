@@ -75,7 +75,7 @@ st.markdown('<h1 class="main-header">🏠 İç Mimar CRM Sistemi</h1>', unsafe_a
 # Sidebar menü
 menu = st.sidebar.selectbox(
     "Menü",
-    ["🏠 Ana Sayfa", "👥 İç Mimarlar", "➕ İç Mimar Ekle", "📅 Randevular", "📆 Randevu Ekle", "📊 İstatistikler", "📤 İçe/Dışa Aktar"]
+    ["🏠 Ana Sayfa", "👥 İç Mimarlar", "➕ İç Mimar Ekle", "📅 Randevular", "📆 Randevu Ekle", "📊 İstatistikler", "📤 İçe/Dışa Aktar", "💼 LinkedIn İçe Aktar"]
 )
 
 # Ana Sayfa
@@ -574,6 +574,303 @@ elif menu == "📤 İçe/Dışa Aktar":
         - Email ve telefon alanları opsiyoneldir
         - Her satır bir iç mimara karşılık gelir
         """)
+
+# LinkedIn İçe Aktar Sayfası
+elif menu == "💼 LinkedIn İçe Aktar":
+    st.header("💼 LinkedIn'den İç Mimar İçe Aktar")
+    
+    st.info("""
+    **LinkedIn bağlantılarınızı kolayca içe aktarın!**
+    
+    Bu özellik, LinkedIn'den dışa aktardığınız CSV dosyasını otomatik olarak sisteminize ekler.
+    """)
+    
+    tab1, tab2 = st.tabs(["📥 LinkedIn CSV Yükle", "📖 Nasıl Yapılır?"])
+    
+    # LinkedIn CSV Yükleme
+    with tab1:
+        st.subheader("📥 LinkedIn Bağlantılarını İçe Aktar")
+        
+        uploaded_file = st.file_uploader("LinkedIn CSV dosyasını yükleyin", type=['csv'], key="linkedin_upload")
+        
+        if uploaded_file is not None:
+            try:
+                # LinkedIn CSV'sini oku
+                linkedin_df = pd.read_csv(uploaded_file)
+                
+                st.success(f"✅ LinkedIn dosyası başarıyla yüklendi! {len(linkedin_df)} bağlantı bulundu.")
+                
+                st.write("**Önizleme (İlk 5 kayıt):**")
+                st.dataframe(linkedin_df.head(), use_container_width=True)
+                
+                st.markdown("---")
+                
+                # Kolon eşleştirme
+                st.subheader("🔄 Kolon Eşleştirme")
+                
+                available_columns = linkedin_df.columns.tolist()
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("**LinkedIn Kolonları → CRM Kolonları**")
+                    
+                    # Otomatik eşleştirme önerileri
+                    first_name_suggestions = [col for col in available_columns if 'first' in col.lower() or 'name' in col.lower() or 'ad' in col.lower() or 'isim' in col.lower()]
+                    last_name_suggestions = [col for col in available_columns if 'last' in col.lower() or 'surname' in col.lower() or 'soyad' in col.lower() or 'soyadı' in col.lower()]
+                    company_suggestions = [col for col in available_columns if 'company' in col.lower() or 'şirket' in col.lower() or 'organization' in col.lower()]
+                    position_suggestions = [col for col in available_columns if 'position' in col.lower() or 'title' in col.lower() or 'pozisyon' in col.lower() or 'ünvan' in col.lower()]
+                    email_suggestions = [col for col in available_columns if 'email' in col.lower() or 'e-mail' in col.lower() or 'mail' in col.lower()]
+                    linkedin_suggestions = [col for col in available_columns if 'url' in col.lower() or 'linkedin' in col.lower() or 'profile' in col.lower()]
+                    
+                    # Eşleştirme selectbox'ları
+                    first_name_col = st.selectbox(
+                        "Ad (First Name) *",
+                        options=["-- Seçiniz --"] + available_columns,
+                        index=available_columns.index(first_name_suggestions[0]) + 1 if first_name_suggestions else 0
+                    )
+                    
+                    last_name_col = st.selectbox(
+                        "Soyad (Last Name) *",
+                        options=["-- Seçiniz --"] + available_columns,
+                        index=available_columns.index(last_name_suggestions[0]) + 1 if last_name_suggestions else 0
+                    )
+                    
+                    company_col = st.selectbox(
+                        "Şirket (Company) *",
+                        options=["-- Seçiniz --"] + available_columns,
+                        index=available_columns.index(company_suggestions[0]) + 1 if company_suggestions else 0
+                    )
+                
+                with col2:
+                    st.write("**Opsiyonel Alanlar**")
+                    
+                    position_col = st.selectbox(
+                        "Pozisyon (Position)",
+                        options=["-- Yok --"] + available_columns,
+                        index=available_columns.index(position_suggestions[0]) + 1 if position_suggestions else 0
+                    )
+                    
+                    email_col = st.selectbox(
+                        "Email",
+                        options=["-- Yok --"] + available_columns,
+                        index=available_columns.index(email_suggestions[0]) + 1 if email_suggestions else 0
+                    )
+                    
+                    linkedin_col = st.selectbox(
+                        "LinkedIn URL",
+                        options=["-- Yok --"] + available_columns,
+                        index=available_columns.index(linkedin_suggestions[0]) + 1 if linkedin_suggestions else 0
+                    )
+                
+                st.markdown("---")
+                
+                # Filtreleme seçenekleri
+                st.subheader("🔍 Filtreleme (Opsiyonel)")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    # Pozisyon/ünvan filtreleme
+                    if position_col and position_col != "-- Yok --":
+                        filter_by_position = st.checkbox("Sadece belirli pozisyonları içe aktar")
+                        if filter_by_position:
+                            position_keywords = st.text_input(
+                                "Pozisyon anahtar kelimeleri (virgülle ayırın)",
+                                placeholder="örn: designer, architect, mimar, tasarımcı"
+                            )
+                        else:
+                            position_keywords = None
+                    else:
+                        position_keywords = None
+                
+                with col2:
+                    # Şirket filtreleme
+                    if company_col and company_col != "-- Seçiniz --":
+                        filter_by_company = st.checkbox("Sadece belirli şirketleri içe aktar")
+                        if filter_by_company:
+                            company_keywords = st.text_input(
+                                "Şirket anahtar kelimeleri (virgülle ayırın)",
+                                placeholder="örn: design, interior, architecture"
+                            )
+                        else:
+                            company_keywords = None
+                    else:
+                        company_keywords = None
+                
+                st.markdown("---")
+                
+                # Önizleme ve İçe Aktarma
+                if first_name_col != "-- Seçiniz --" and last_name_col != "-- Seçiniz --" and company_col != "-- Seçiniz --":
+                    
+                    # Veriyi dönüştür
+                    converted_data = []
+                    
+                    for idx, row in linkedin_df.iterrows():
+                        # Filtreleme kontrolü
+                        skip = False
+                        
+                        # Pozisyon filtresi
+                        if position_keywords and position_col and position_col != "-- Yok --":
+                            position_value = str(row.get(position_col, '')).lower()
+                            keywords = [k.strip().lower() for k in position_keywords.split(',')]
+                            if not any(keyword in position_value for keyword in keywords):
+                                skip = True
+                        
+                        # Şirket filtresi
+                        if company_keywords and company_col:
+                            company_value = str(row.get(company_col, '')).lower()
+                            keywords = [k.strip().lower() for k in company_keywords.split(',')]
+                            if not any(keyword in company_value for keyword in keywords):
+                                skip = True
+                        
+                        if skip:
+                            continue
+                        
+                        # Veri dönüşümü
+                        new_record = {
+                            'first name': row.get(first_name_col, ''),
+                            'last name': row.get(last_name_col, ''),
+                            'company name': row.get(company_col, ''),
+                            'email': row.get(email_col, '') if email_col and email_col != "-- Yok --" else '',
+                            'phone': '',  # LinkedIn'den telefon genelde gelmez
+                            'address': row.get(position_col, '') if position_col and position_col != "-- Yok --" else '',  # Pozisyonu adres alanına koyuyoruz
+                            'linkedin adress': row.get(linkedin_col, '') if linkedin_col and linkedin_col != "-- Yok --" else ''
+                        }
+                        
+                        converted_data.append(new_record)
+                    
+                    converted_df = pd.DataFrame(converted_data)
+                    
+                    st.subheader("📊 Dönüştürülmüş Veri Önizleme")
+                    st.info(f"**{len(converted_df)} kayıt** sisteminize eklenecek")
+                    
+                    st.dataframe(converted_df.head(10), use_container_width=True)
+                    
+                    st.markdown("---")
+                    
+                    # İçe aktarma butonları
+                    col1, col2, col3 = st.columns([1, 1, 1])
+                    
+                    with col1:
+                        if st.button("✅ LinkedIn Verilerini Ekle", type="primary", use_container_width=True):
+                            if len(converted_df) > 0:
+                                df = load_designers()
+                                combined_df = pd.concat([df, converted_df], ignore_index=True)
+                                save_designers(combined_df)
+                                st.success(f"🎉 {len(converted_df)} LinkedIn bağlantısı başarıyla eklendi!")
+                                st.balloons()
+                                st.rerun()
+                            else:
+                                st.warning("⚠️ Eklenecek kayıt bulunamadı. Filtreleri kontrol edin.")
+                    
+                    with col2:
+                        # CSV olarak indir
+                        csv_data = converted_df.to_csv(index=False).encode('utf-8')
+                        st.download_button(
+                            label="📥 Önce İncele (CSV İndir)",
+                            data=csv_data,
+                            file_name=f"linkedin_donusturulmus_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                            mime="text/csv",
+                            use_container_width=True
+                        )
+                    
+                    with col3:
+                        if st.button("🔄 Yeniden Başlat", use_container_width=True):
+                            st.rerun()
+                
+                else:
+                    st.warning("⚠️ Lütfen en az Ad, Soyad ve Şirket kolonlarını eşleştirin.")
+                
+            except Exception as e:
+                st.error(f"❌ Dosya işlenirken hata oluştu: {str(e)}")
+                st.info("Lütfen LinkedIn'den doğru formatta CSV dosyası indirdiğinizden emin olun.")
+    
+    # Nasıl Yapılır
+    with tab2:
+        st.subheader("📖 LinkedIn'den Bağlantıları Nasıl Dışa Aktarırım?")
+        
+        st.markdown("""
+        ### 🔷 Adım 1: LinkedIn'e Giriş Yapın
+        1. [LinkedIn.com](https://www.linkedin.com) adresine gidin
+        2. Hesabınıza giriş yapın
+        
+        ### 🔷 Adım 2: Bağlantılarınıza Gidin
+        1. Üst menüden **"My Network"** (Ağım) bölümüne tıklayın
+        2. Sol taraftan **"Connections"** (Bağlantılar) seçeneğine tıklayın
+        
+        ### 🔷 Adım 3: Bağlantıları Dışa Aktarın
+        1. Sağ üst köşedeki **"Manage synced and imported contacts"** linkine tıklayın
+        2. **"Export contacts"** (Bağlantıları dışa aktar) butonuna tıklayın
+        3. LinkedIn size bir **CSV dosyası** gönderecektir (Email'inize)
+        
+        ### 🔷 Adım 4: CSV Dosyasını İndirin
+        1. Email'inizi kontrol edin (birkaç dakika sürebilir)
+        2. LinkedIn'den gelen emaili açın
+        3. **"Download"** linkine tıklayarak CSV dosyasını indirin
+        
+        ### 🔷 Adım 5: Buraya Yükleyin
+        1. **"📥 LinkedIn CSV Yükle"** sekmesine dönün
+        2. İndirdiğiniz CSV dosyasını yükleyin
+        3. Kolon eşleştirmelerini yapın
+        4. Filtreleme seçeneklerini ayarlayın (opsiyonel)
+        5. **"✅ LinkedIn Verilerini Ekle"** butonuna tıklayın
+        
+        ---
+        
+        ### 💡 İpuçları
+        
+        ✅ **Filtreleme Kullanın:** Sadece iç mimarlarla ilgili bağlantıları içe aktarın
+        - Pozisyon: `designer, architect, interior, mimar, tasarımcı`
+        - Şirket: `design, architecture, interior, studio`
+        
+        ✅ **Önce İnceleyin:** "📥 Önce İncele" butonu ile dönüştürülmüş veriyi CSV olarak indirip kontrol edebilirsiniz
+        
+        ✅ **Toplu İşlem:** Binlerce bağlantınız varsa, filtreleme yaparak sadece ilgili kişileri ekleyin
+        
+        ✅ **Güncelleme:** Aynı kişiyi tekrar eklerseniz, yeni bir kayıt olarak eklenir
+        
+        ---
+        
+        ### 🔍 Desteklenen LinkedIn CSV Formatları
+        
+        Bu özellik aşağıdaki LinkedIn CSV sütunlarını otomatik olarak tanır:
+        
+        - **First Name** / **İsim** → Ad
+        - **Last Name** / **Soyisim** → Soyad  
+        - **Company** / **Şirket** → Şirket Adı
+        - **Position** / **Pozisyon** → Adres (Not olarak)
+        - **Email Address** → Email
+        - **URL** / **LinkedIn URL** → LinkedIn Adresi
+        
+        ---
+        
+        ### ❓ Sık Sorulan Sorular
+        
+        **S: LinkedIn'den telefon numarası gelir mi?**
+        A: Hayır, LinkedIn genelde telefon numarası paylaşmaz. Bu alanı manuel doldurmanız gerekebilir.
+        
+        **S: Aynı kişiyi iki kez eklesem ne olur?**
+        A: Sistem şu anda yeni kayıt olarak ekler. İçe aktarmadan önce verileri gözden geçirin.
+        
+        **S: Filtreleme nasıl çalışır?**
+        A: Yazdığınız anahtar kelimeler pozisyon veya şirket adında geçiyorsa o kayıt eklenir, geçmiyorsa atlanır.
+        
+        **S: CSV dosyam farklı formatta, çalışır mı?**
+        A: Evet! Kolon eşleştirme özelliği sayesinde herhangi bir CSV formatını destekliyoruz.
+        
+        ---
+        
+        ### 📞 Yardıma mı İhtiyacınız Var?
+        
+        Sorun yaşıyorsanız:
+        1. LinkedIn'den indirdiğiniz dosyanın **.csv** formatında olduğundan emin olun
+        2. Dosyayı Excel'de açıp kontrol edin
+        3. En az Ad, Soyad ve Şirket sütunları olmalı
+        4. Türkçe karakter sorunu varsa, dosyayı **UTF-8** encoding ile kaydedin
+        """)
+        
+        st.info("💼 **Pro İpucu:** LinkedIn Sales Navigator kullanıyorsanız, daha detaylı veri dışa aktarabilirsiniz!")
 
 # Footer
 st.markdown("---")
